@@ -14,7 +14,7 @@ import { Contact } from "@/components/paper/Contact";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Dev Patel — Web Developer, Vadodara | The Investigation Desk" },
+      { title: "Dev Patel — Full-Stack Developer | Vadodara" },
       {
         name: "description",
         content:
