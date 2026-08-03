@@ -1,0 +1,355 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@theme {
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Libre Baskerville", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-stamp: "Special Elite", "Courier New", monospace;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system — "The Investigation Desk"
+ * Newsprint paper, ink black, stamp red. All colors in oklch.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-stamp: var(--stamp);
+  --color-rule: var(--rule);
+}
+
+:root {
+  --radius: 0.125rem;
+
+  --paper: oklch(0.949 0.014 88);
+  --paper-deep: oklch(0.907 0.019 86);
+  --ink: oklch(0.222 0.008 60);
+  --ink-soft: oklch(0.475 0.012 70);
+  --stamp: oklch(0.482 0.176 27);
+  --rule: oklch(0.222 0.008 60 / 22%);
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: oklch(0.968 0.012 90);
+  --card-foreground: var(--ink);
+  --popover: oklch(0.968 0.012 90);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --secondary: var(--paper-deep);
+  --secondary-foreground: var(--ink);
+  --muted: var(--paper-deep);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--stamp);
+  --accent-foreground: oklch(0.97 0.01 90);
+  --destructive: var(--stamp);
+  --destructive-foreground: oklch(0.97 0.01 90);
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--ink-soft);
+}
+
+.dark {
+  --paper: oklch(0.19 0.008 70);
+  --paper-deep: oklch(0.24 0.01 70);
+  --ink: oklch(0.93 0.012 88);
+  --ink-soft: oklch(0.68 0.012 80);
+  --stamp: oklch(0.62 0.17 27);
+  --rule: oklch(0.93 0.012 88 / 22%);
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: oklch(0.23 0.01 70);
+  --card-foreground: var(--ink);
+  --popover: oklch(0.23 0.01 70);
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --secondary: var(--paper-deep);
+  --secondary-foreground: var(--ink);
+  --muted: var(--paper-deep);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--stamp);
+  --accent-foreground: oklch(0.15 0.01 70);
+  --destructive: var(--stamp);
+  --destructive-foreground: oklch(0.97 0.01 90);
+  --border: var(--rule);
+  --input: var(--rule);
+  --ring: var(--ink-soft);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--ink);
+    color: var(--paper);
+  }
+}
+
+/* ===== Paper texture ===== */
+@utility paper-grain {
+  isolation: isolate;
+}
+.paper-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  background-image:
+    radial-gradient(circle at 20% 30%, color-mix(in oklab, var(--ink) 5%, transparent) 0 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, color-mix(in oklab, var(--ink) 4%, transparent) 0 1px, transparent 1px);
+  background-size: 7px 7px, 11px 11px;
+}
+
+@utility halftone {
+  background-image: radial-gradient(
+    color-mix(in oklab, var(--ink) 45%, transparent) 1px,
+    transparent 1.2px
+  );
+  background-size: 4px 4px;
+}
+
+@utility rule-double {
+  border-top: 3px double var(--ink);
+}
+
+@utility label-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* ===== Newsprint columns ===== */
+.dropcap::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 4.2rem;
+  line-height: 0.78;
+  padding: 0.1rem 0.6rem 0 0;
+}
+
+.col-2 {
+  column-count: 2;
+  column-gap: 2rem;
+  column-rule: 1px solid var(--rule);
+}
+@media (max-width: 767px) {
+  .col-2 { column-count: 1; }
+}
+
+/* ===== Stamp ===== */
+.stamp {
+  border: 2px solid var(--stamp);
+  color: var(--stamp);
+  font-family: var(--font-stamp);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transform: rotate(-8deg);
+  opacity: 0.85;
+}
+
+/* ===== Animations ===== */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee { animation: marquee 38s linear infinite; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fade-up 0.7s cubic-bezier(.2,.7,.3,1) both; }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fade-in { animation: fade-in 0.6s ease-out both; }
+
+@keyframes ink-in {
+  from { opacity: 0; filter: blur(6px); letter-spacing: 0.3em; }
+  to   { opacity: 1; filter: blur(0);   letter-spacing: normal; }
+}
+.ink-in { animation: ink-in 0.9s ease-out both; }
+
+@keyframes glass-hint {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.04); }
+}
+.glass-hint { animation: glass-hint 2.4s ease-in-out infinite; }
+
+@keyframes curtain-up {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-100%); }
+}
+.curtain-up { animation: curtain-up 0.9s cubic-bezier(.7,0,.3,1) forwards; }
+
+/* ===== Evidence board ===== */
+.corkboard {
+  background-color: var(--paper-deep);
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      color-mix(in oklab, var(--ink) 4%, transparent) 0 2px,
+      transparent 2px 6px
+    ),
+    radial-gradient(circle at 30% 20%, color-mix(in oklab, var(--ink) 6%, transparent), transparent 60%);
+}
+
+.pin-card {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  padding: 0.85rem;
+  box-shadow: 0 6px 14px -10px color-mix(in oklab, var(--ink) 50%, transparent);
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 0.25s ease;
+}
+.pin-card:hover {
+  transform: rotate(0deg);
+}
+.pin-card::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: var(--stamp);
+}
+
+@keyframes string-draw {
+  from { stroke-dashoffset: 1200; opacity: 0; }
+  10%  { opacity: 1; }
+  to   { stroke-dashoffset: 0; opacity: 1; }
+}
+.string-draw {
+  stroke-dasharray: 1200;
+  animation: string-draw 1.4s cubic-bezier(.2,.7,.3,1) both;
+}
+
+/* ===== Redaction ===== */
+.redacted {
+  background: var(--ink);
+  color: transparent;
+  border-radius: 1px;
+  cursor: help;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+.redacted:hover,
+.redacted:focus-visible {
+  background: color-mix(in oklab, var(--stamp) 18%, transparent);
+  color: var(--ink);
+  outline: none;
+}
+
+/* ===== Typewriter ===== */
+@keyframes type-caret {
+  0%, 45%  { opacity: 1; }
+  50%, 95% { opacity: 0; }
+}
+.type-caret {
+  display: inline-block;
+  width: 0.55ch;
+  animation: type-caret 1s steps(1) infinite;
+}
+
+/* ===== Stamp-in ===== */
+@keyframes stamp-in {
+  0%   { opacity: 0; transform: rotate(-8deg) scale(1.7); }
+  60%  { opacity: 1; transform: rotate(-8deg) scale(0.94); }
+  100% { opacity: 0.85; transform: rotate(-8deg) scale(1); }
+}
+.stamp-in { animation: stamp-in 0.5s cubic-bezier(.2,.8,.3,1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee,
+  .fade-up,
+  .fade-in,
+  .ink-in,
+  .glass-hint,
+  .curtain-up,
+  .string-draw,
+  .stamp-in,
+  .type-caret {
+    animation: none !important;
+  }
+  .fade-up,
+  .ink-in {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .pin-card {
+    transform: none;
+  }
+  .pin-card:hover {
+    transform: none;
+  }
+  .dropcap::first-letter {
+    font-size: 3.2rem;
+  }
+}
+
+@media print {
+  header, .no-print { display: none !important; }
+  body { background: #fff; color: #000; }
+}
+
