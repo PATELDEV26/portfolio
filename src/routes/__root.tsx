@@ -1,11 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  Outlet,
+  HeadContent,
   Link,
+  Outlet,
+  Scripts,
   createRootRouteWithContext,
   useRouter,
-  HeadContent,
-  Scripts,
 } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
@@ -73,17 +73,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Dev Patel — AI-minded Full-Stack Developer, Vadodara" },
+      { title: "Dev Patel | Full-Stack Developer & AI Engineer" },
       {
         name: "description",
         content:
-          "Portfolio of Dev Patel — final-year CSE student and full-stack developer from Vadodara, Gujarat.",
+          "Portfolio of Dev Patel, a full-stack developer in Vadodara building expressive digital products with React, TypeScript, Node, Python, and AI.",
       },
       { name: "author", content: "Dev Patel" },
-      { property: "og:title", content: "Dev Patel — Full-Stack Developer, Vadodara" },
+      { property: "og:title", content: "Dev Patel | The Dev Field" },
       {
         property: "og:description",
-        content: "Selected works, stack, credentials and contact for Dev Patel.",
+        content:
+          "Selected systems, experiments, and the story of a full-stack developer moving toward AI engineering.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -98,11 +99,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=Special+Elite&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,ital,wght@6..96,0,400..900;6..96,1,400..900&family=Manrope:wght@400;500;600;700;800&display=swap",
       },
     ],
   }),
-
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
