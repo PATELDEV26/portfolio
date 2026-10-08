@@ -20,11 +20,7 @@ function Newsprint({ sharp }: { sharp?: boolean }) {
                 key={r}
                 style={{ width: `${w}%` }}
                 className={
-                  isHead
-                    ? "h-[7px] bg-ink/75"
-                    : sharp
-                      ? "h-[3px] bg-ink/35"
-                      : "h-[3px] bg-ink/25"
+                  isHead ? "h-[7px] bg-ink/75" : sharp ? "h-[3px] bg-ink/35" : "h-[3px] bg-ink/25"
                 }
               />
             );
@@ -177,13 +173,7 @@ export function Intro({ onDone }: { onDone: () => void }) {
   );
 }
 
-const WantedPoster = ({
-  ref,
-  found,
-}: {
-  ref: React.Ref<HTMLDivElement>;
-  found: boolean;
-}) => (
+const WantedPoster = ({ ref, found }: { ref: React.Ref<HTMLDivElement>; found: boolean }) => (
   <div
     ref={ref}
     className={`w-56 max-w-full border-2 border-ink bg-paper px-4 py-4 text-center transition-transform duration-500 ${

@@ -45,10 +45,7 @@ export function LabReport() {
             </thead>
             <tbody>
               {SUBSTANCES.map((s, i) => (
-                <tr
-                  key={s.code}
-                  className={`border-t border-rule ${i % 2 ? "bg-paper/40" : ""}`}
-                >
+                <tr key={s.code} className={`border-t border-rule ${i % 2 ? "bg-paper/40" : ""}`}>
                   <td className="px-4 py-3 font-display text-base font-bold">{s.name}</td>
                   <td className="px-4 py-3 font-mono text-[11px] tracking-[0.16em] text-ink-soft">
                     {s.code}
@@ -71,9 +68,7 @@ export function LabReport() {
           </table>
         </div>
 
-        <p className="mt-4 text-xs text-ink-soft">
-          Day-to-day tools — not a scoreboard.
-        </p>
+        <p className="mt-4 text-xs text-ink-soft">Day-to-day tools — not a scoreboard.</p>
       </div>
     </section>
   );

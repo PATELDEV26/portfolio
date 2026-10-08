@@ -1,450 +1,363 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import { motion, useScroll, useSpring } from "framer-motion";
 import {
   ArrowDown,
-  ArrowLeft,
-  ArrowRight,
   ArrowUpRight,
-  Download,
+  Braces,
+  ChevronLeft,
+  ChevronRight,
   Github,
   Linkedin,
   Mail,
-  MapPin,
+  Menu,
   X,
 } from "lucide-react";
-import {
-  useEffect,
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
-} from "react";
 
-import {
-  CAREER_TIMELINE,
-  CERTIFICATIONS,
-  IN_PROGRESS_CERTS,
-  PROFILE,
-  PROJECTS,
-  SKILL_GROUPS,
-  type Project,
-} from "@/content/metro";
+import { CREDENTIALS, EXHIBITS, IN_PROGRESS, LEDGER, SUBJECT, SUBSTANCES } from "@/content/dossier";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Dev Patel | Full-Stack Developer & AI Engineer" },
-      {
-        name: "description",
-        content:
-          "Dev Patel is a full-stack developer in Vadodara building expressive digital products with React, TypeScript, Node, Python, and AI.",
-      },
-      { property: "og:title", content: "Dev Patel | The Dev Field" },
-      {
-        property: "og:description",
-        content:
-          "Selected systems, experiments, and the story of a full-stack developer moving toward AI engineering.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: Home,
-});
+export const Route = createFileRoute("/")({ component: Portfolio });
 
-const EASE = [0.22, 1, 0.36, 1] as const;
+const PROJECT_COLORS = ["#e8a11b", "#de5d3f", "#8cb0c7", "#d4c0a9", "#b7c957", "#ece5d7"];
 
-function Home() {
-  const reduceMotion = Boolean(useReducedMotion());
-  const [entered, setEntered] = useState(false);
-  const [activeProject, setActiveProject] = useState<Project | null>(null);
-  const [projectImageIndex, setProjectImageIndex] = useState(0);
-  const [cursorLabel, setCursorLabel] = useState("");
+function ScrollProgress() {
   const { scrollYProgress } = useScroll();
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 140,
-    damping: 30,
-    restDelta: 0.001,
-  });
+  const scaleX = useSpring(scrollYProgress, { stiffness: 160, damping: 28, mass: 0.2 });
+  return <motion.div className="scroll-progress" style={{ scaleX }} />;
+}
+
+function SiteNav() {
+  const [open, setOpen] = useState(false);
+  const links = [
+    ["Work", "#work"],
+    ["About", "#about"],
+    ["Toolkit", "#toolkit"],
+    ["Contact", "#contact"],
+  ];
 
   useEffect(() => {
-    document.body.style.overflow = entered && !activeProject ? "" : "hidden";
+    document.body.style.overflow = open ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [activeProject, entered]);
+  }, [open]);
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && activeProject) setActiveProject(null);
-      if ((event.key === "Enter" || event.key === " ") && !entered) setEntered(true);
-    };
+  return (
+    <>
+      <nav className="site-nav" aria-label="Primary navigation">
+        <a className="brand" href="#top" aria-label="Dev Patel, home">
+          <span className="brand-mark">
+            <Braces size={19} strokeWidth={2.4} />
+          </span>
+          <span>DEV PATEL</span>
+        </a>
+        <div className="nav-center" aria-hidden="true">
+          <span>AI SYSTEMS</span>
+          <span className="nav-pulse" />
+          <span>FULL-STACK</span>
+        </div>
+        <div className="nav-links">
+          {links.map(([label, href]) => (
+            <a key={href} href={href}>
+              {label}
+            </a>
+          ))}
+        </div>
+        <button className="menu-button" onClick={() => setOpen(true)} aria-label="Open navigation">
+          <Menu size={22} />
+        </button>
+      </nav>
+      {open && (
+        <div className="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
+          <div className="mobile-menu-top">
+            <span className="eyebrow">Navigation / 2026</span>
+            <button onClick={() => setOpen(false)} aria-label="Close navigation">
+              <X />
+            </button>
+          </div>
+          <div className="mobile-menu-links">
+            {links.map(([label, href], index) => (
+              <a key={href} href={href} onClick={() => setOpen(false)}>
+                <span>0{index + 1}</span>
+                {label}
+              </a>
+            ))}
+          </div>
+          <a className="mobile-email" href={`mailto:${SUBJECT.email}`}>
+            {SUBJECT.email}
+          </a>
+        </div>
+      )}
+    </>
+  );
+}
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeProject, entered]);
-
-  const openProject = (project: Project) => {
-    setProjectImageIndex(0);
-    setActiveProject(project);
+function Hero() {
+  const [active, setActive] = useState(0);
+  const project = EXHIBITS[active];
+  const changeChannel = (direction: number) => {
+    setActive((current) => (current + direction + EXHIBITS.length) % EXHIBITS.length);
   };
 
   return (
-    <div className="portfolio-shell">
-      <AnimatePresence mode="wait">
-        {!entered ? (
-          <EntryPortal key="entry" onEnter={() => setEntered(true)} reduceMotion={reduceMotion} />
-        ) : (
-          <motion.div
-            key="experience"
-            className="experience"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: reduceMotion ? 0 : 0.65 }}
-          >
-            <motion.div className="scroll-progress" style={{ scaleX: smoothProgress }} />
-            <CursorHalo label={cursorLabel} />
-            <SiteHeader />
-            <main>
-              <Hero reduceMotion={reduceMotion} />
-              <Manifesto />
-              <Work
-                openProject={openProject}
-                setCursorLabel={setCursorLabel}
-                reduceMotion={reduceMotion}
-              />
-              <Profile />
-              <Skills />
-              <Journey />
-              <Credentials />
-              <Contact />
-            </main>
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <section id="top" className="tv-hero">
+      <div className="tv-hero-head">
+        <a href="#top" className="tv-wordmark">
+          DEV PATEL<sup>®</sup>
+        </a>
+        <p>AI ENGINEER / FULL-STACK BUILDER</p>
+        <span>VADODARA · INDIA</span>
+      </div>
 
-      <AnimatePresence>
-        {activeProject ? (
-          <ProjectStory
-            project={activeProject}
-            imageIndex={projectImageIndex}
-            setImageIndex={setProjectImageIndex}
-            onClose={() => setActiveProject(null)}
-            reduceMotion={reduceMotion}
+      <h1 className="sr-only">Dev Patel — AI engineer and full-stack builder</h1>
+
+      <div className="tv-stage">
+        <img
+          className="tv-shell-image"
+          src="/ai-terminal-hero.png"
+          alt="A retro-futuristic orange AI terminal in a dark engineering studio"
+        />
+        <div className="tv-screen" aria-live="polite">
+          <img
+            key={project.id}
+            src={project.images[0]}
+            alt={`${project.title} project interface`}
           />
-        ) : null}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function EntryPortal({ onEnter, reduceMotion }: { onEnter: () => void; reduceMotion: boolean }) {
-  return (
-    <motion.section
-      className="entry"
-      aria-label="Portfolio introduction"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: reduceMotion ? 1 : 1.035 }}
-      transition={{ duration: reduceMotion ? 0.1 : 0.7, ease: EASE }}
-    >
-      <div className="entry__grain" />
-      <div className="entry__topline">
-        <FieldMark />
-        <span>DEV PATEL / PORTFOLIO 2026</span>
-        <span>VADODARA, IN</span>
-      </div>
-
-      <motion.div
-        className="entry__orb"
-        initial={{ scale: reduceMotion ? 1 : 0.5, rotate: -20 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ duration: reduceMotion ? 0 : 1.2, ease: EASE }}
-      >
-        <span>FULL-STACK</span>
-        <span>AI / NEXT</span>
-      </motion.div>
-
-      <div className="entry__copy">
-        <span className="eyebrow">WELCOME TO</span>
-        <h1>
-          THE DEV
-          <br />
-          FIELD<sup>TM</sup>
-        </h1>
-        <p>A living portfolio of code, systems, curiosity, and forward motion.</p>
-      </div>
-
-      <button className="entry__button" onClick={onEnter} autoFocus>
-        <span>Enter the field</span>
-        <ArrowDown aria-hidden="true" />
-      </button>
-    </motion.section>
-  );
-}
-
-function SiteHeader() {
-  return (
-    <header className="site-header">
-      <a className="brand" href="#top" aria-label="Dev Patel, back to top">
-        <FieldMark />
-        <span>
-          DEV PATEL
-          <small>FULL-STACK / AI</small>
-        </span>
-      </a>
-
-      <nav aria-label="Primary navigation">
-        <a href="#work">Work</a>
-        <a href="#profile">Profile</a>
-        <a href="#journey">Journey</a>
-      </nav>
-
-      <a className="availability" href={`mailto:${PROFILE.email}`}>
-        <i aria-hidden="true" /> Available for work
-      </a>
-    </header>
-  );
-}
-
-function Hero({ reduceMotion }: { reduceMotion: boolean }) {
-  return (
-    <section className="hero" id="top">
-      <div className="hero__orbit" aria-hidden="true">
-        <div className="hero__sun" />
-        <span className="orbit orbit--one" />
-        <span className="orbit orbit--two" />
-        <span className="orbit orbit--three" />
-      </div>
-
-      <div className="hero__kicker">
-        <span>01 / INTRODUCTION</span>
-        <span>SCROLL TO DISCOVER</span>
-      </div>
-
-      <motion.h1
-        initial={{ y: reduceMotion ? 0 : 90, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: reduceMotion ? 0 : 1, ease: EASE, delay: 0.1 }}
-      >
-        <span className="hero__name hero__name--dev">DEV</span>
-        <span className="hero__name hero__name--patel">PATEL</span>
-      </motion.h1>
-
-      <div className="hero__footer">
-        <p>{PROFILE.headline}</p>
-        <div className="hero__coordinates">
-          <MapPin aria-hidden="true" />
-          <span>22.3072 N / 73.1812 E</span>
+          <div className="tv-scanlines" aria-hidden="true" />
+          <div className="tv-screen-meta">
+            <span>CH {String(active + 1).padStart(2, "0")}</span>
+            <span>{project.kicker}</span>
+          </div>
+          <a href={project.repo} target="_blank" rel="noreferrer" className="tv-open-project">
+            Open project <ArrowUpRight size={15} />
+          </a>
         </div>
-        <a href="#work" className="round-link" aria-label="Explore selected projects">
-          <ArrowDown aria-hidden="true" />
+        <button
+          className="tv-hardware-button tv-hardware-prev"
+          onClick={() => changeChannel(-1)}
+          aria-label="Previous project channel"
+        >
+          <ChevronLeft />
+        </button>
+        <button
+          className="tv-hardware-button tv-hardware-next"
+          onClick={() => changeChannel(1)}
+          aria-label="Next project channel"
+        >
+          <ChevronRight />
+        </button>
+      </div>
+
+      <div className="tv-channel-bar">
+        <button onClick={() => changeChannel(-1)} aria-label="Previous channel">
+          <ChevronLeft />
+        </button>
+        <div>
+          <span>NOW PLAYING / {String(active + 1).padStart(2, "0")}</span>
+          <strong>{project.title}</strong>
+        </div>
+        <p>{project.body}</p>
+        <button onClick={() => changeChannel(1)} aria-label="Next channel">
+          <ChevronRight />
+        </button>
+      </div>
+
+      <a className="tv-scroll" href="#statement">
+        Scroll to enter the lab <ArrowDown size={16} />
+      </a>
+    </section>
+  );
+}
+
+function Statement() {
+  return (
+    <section id="statement" className="statement-section">
+      <p className="eyebrow">What I do / Why it matters</p>
+      <h2>
+        Software with
+        <br />
+        <em>intelligence</em>
+        <br />
+        built in.
+      </h2>
+      <div>
+        <p>
+          I turn rough ideas into working products—then add the data, automation and AI that make
+          them more useful.
+        </p>
+        <a href="#work">
+          Explore the case files <ArrowDown size={16} />
         </a>
       </div>
     </section>
   );
 }
 
-function Manifesto() {
+function Marquee() {
+  const text =
+    "PYTHON · REACT · TYPESCRIPT · NODE · GENERATIVE AI · WEBSOCKETS · PRODUCT THINKING · ";
   return (
-    <section className="manifesto">
-      <Reveal>
-        <p className="section-label">THE OPERATING IDEA</p>
-      </Reveal>
-      <Reveal>
-        <h2>
-          I turn <em>curiosity</em> into useful systems, then sweat the details until they feel
-          inevitable.
-        </h2>
-      </Reveal>
-      <Reveal>
-        <div className="manifesto__meta">
-          <span>REACT / TYPESCRIPT / NODE</span>
-          <p>
-            Full-stack today. AI engineering tomorrow. Always building the bridge by shipping real
-            work.
-          </p>
-        </div>
-      </Reveal>
-    </section>
+    <div className="marquee" aria-label={text}>
+      <div className="marquee-track">
+        <span>{text}</span>
+        <span aria-hidden="true">{text}</span>
+      </div>
+    </div>
   );
 }
 
-function Work({
-  openProject,
-  setCursorLabel,
-  reduceMotion,
-}: {
-  openProject: (project: Project) => void;
-  setCursorLabel: (label: string) => void;
-  reduceMotion: boolean;
-}) {
+function Work() {
   return (
-    <section className="work" id="work">
+    <section id="work" className="work-section">
       <div className="section-intro">
-        <p className="section-label">02 / SELECTED SYSTEMS</p>
-        <h2>Proof over promises.</h2>
-        <p>Six self-directed builds across product UI, algorithms, real-time systems, and AI.</p>
+        <p className="eyebrow">01 / Selected systems</p>
+        <h2>
+          Proof lives
+          <br />
+          in the build.
+        </h2>
+        <p className="section-copy">
+          Six end-to-end projects across machine learning, real-time systems, tooling and interface
+          engineering.
+        </p>
       </div>
-
-      <div className="project-list">
-        {PROJECTS.map((project, index) => (
-          <ProjectChapter
+      <div className="case-stack">
+        {EXHIBITS.map((project, index) => (
+          <article
+            className="case-card"
             key={project.id}
-            project={project}
-            index={index}
-            openProject={openProject}
-            setCursorLabel={setCursorLabel}
-            reduceMotion={reduceMotion}
-          />
+            style={
+              {
+                "--case-color": PROJECT_COLORS[index],
+                "--case-offset": `${84 + Math.min(index, 3) * 9}px`,
+              } as React.CSSProperties
+            }
+          >
+            <div className="case-number">{String(index + 1).padStart(2, "0")}</div>
+            <div className="case-media">
+              <img
+                src={project.images[0]}
+                alt={`${project.title} interface`}
+                loading={index < 2 ? "eager" : "lazy"}
+              />
+              <span className="case-year">{project.period}</span>
+            </div>
+            <div className="case-info">
+              <div>
+                <p className="eyebrow">{project.kicker}</p>
+                <h3>{project.title}</h3>
+              </div>
+              <p className="case-description">{project.body}</p>
+              <div className="case-bottom">
+                <ul>
+                  {project.stack.map((tech) => (
+                    <li key={tech}>{tech}</li>
+                  ))}
+                </ul>
+                <a
+                  href={project.repo}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`View ${project.title} on GitHub`}
+                >
+                  View source <ArrowUpRight size={18} />
+                </a>
+              </div>
+            </div>
+          </article>
         ))}
       </div>
     </section>
   );
 }
 
-function ProjectChapter({
-  project,
-  index,
-  openProject,
-  setCursorLabel,
-  reduceMotion,
-}: {
-  project: Project;
-  index: number;
-  openProject: (project: Project) => void;
-  setCursorLabel: (label: string) => void;
-  reduceMotion: boolean;
-}) {
-  const cardRef = useRef<HTMLButtonElement>(null);
-
-  const onPointerMove = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (reduceMotion || !cardRef.current) return;
-    const bounds = cardRef.current.getBoundingClientRect();
-    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
-    cardRef.current.style.setProperty("--tilt-x", `${y * -2.5}deg`);
-    cardRef.current.style.setProperty("--tilt-y", `${x * 3.5}deg`);
-  };
-
+function About() {
   return (
-    <motion.article
-      className={`project project--${(index % 3) + 1}`}
-      initial={{ opacity: 0, y: reduceMotion ? 0 : 70 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.18 }}
-      transition={{ duration: reduceMotion ? 0 : 0.75, ease: EASE }}
-    >
-      <button
-        ref={cardRef}
-        className="project__button"
-        onClick={() => openProject(project)}
-        onPointerEnter={() => setCursorLabel("VIEW")}
-        onPointerLeave={() => {
-          setCursorLabel("");
-          cardRef.current?.style.setProperty("--tilt-x", "0deg");
-          cardRef.current?.style.setProperty("--tilt-y", "0deg");
-        }}
-        onPointerMove={onPointerMove}
-        aria-label={`Open ${project.name} case study`}
-      >
-        <div className="project__index">
-          <span>{String(index + 1).padStart(2, "0")}</span>
-          <span>{project.year}</span>
-        </div>
-
-        <div className="project__image-wrap">
-          <motion.img
-            layoutId={`project-image-${project.id}`}
-            src={project.images[0]}
-            alt={`${project.name} interface preview`}
-            loading={index > 1 ? "lazy" : "eager"}
-          />
-          <span className="project__stamp">CASE / {String(index + 1).padStart(2, "0")}</span>
-        </div>
-
-        <div className="project__copy">
-          <h3>{project.name}</h3>
-          <p>{project.summary}</p>
-          <div className="project__tags">
-            {project.stack.slice(0, 3).map((item) => (
-              <span key={item}>{item}</span>
-            ))}
-          </div>
-        </div>
-
-        <span className="project__open" aria-hidden="true">
-          OPEN STORY <ArrowUpRight />
-        </span>
-      </button>
-    </motion.article>
-  );
-}
-
-function Profile() {
-  return (
-    <section className="profile" id="profile">
-      <div className="profile__image">
-        <img src="/media/dev-photo.jpg" alt="Dev Patel, full-stack developer" loading="lazy" />
-        <span className="profile__image-label">THE HUMAN / BEHIND THE SYSTEMS</span>
-      </div>
-
-      <div className="profile__content">
-        <p className="section-label">03 / PROFILE</p>
+    <section id="about" className="about-section">
+      <div className="about-heading">
+        <p className="eyebrow">02 / Operating principle</p>
         <h2>
-          Builder by habit.
+          Curious enough
           <br />
-          Engineer by direction.
+          to go deep.
+          <br />
+          <em>Practical enough</em>
+          <br />
+          to ship.
         </h2>
-        <p className="profile__bio">{PROFILE.bio}</p>
-
-        <div className="profile__facts">
-          <div>
-            <strong>06</strong>
-            <span>SHIPPED PROJECTS</span>
+      </div>
+      <div className="about-body">
+        <figure className="portrait-wrap">
+          <img src="/media/dev-photo.jpg" alt="Dev Patel" loading="lazy" />
+          <figcaption>Dev Patel / Vadodara, India</figcaption>
+        </figure>
+        <div className="about-copy">
+          <p className="about-lead">
+            I’m a final-year computer science student building toward AI engineering from a strong
+            full-stack base.
+          </p>
+          <p>
+            My best learning happens inside real products: a recommender where the maths drives the
+            experience, a chat app that handles live state, a visualiser that turns algorithms into
+            motion, or a scraper that replaces repetitive work.
+          </p>
+          <p>
+            I care about the full arc—from understanding the problem and structuring the system to
+            making the interface feel obvious.
+          </p>
+          <div className="about-facts">
+            <div>
+              <strong>06</strong>
+              <span>Independent products</span>
+            </div>
+            <div>
+              <strong>2027</strong>
+              <span>CSE graduation</span>
+            </div>
+            <div>
+              <strong>24h</strong>
+              <span>Typical reply time</span>
+            </div>
           </div>
-          <div>
-            <strong>2027</strong>
-            <span>GRADUATION</span>
-          </div>
-          <div>
-            <strong>&lt;24H</strong>
-            <span>REPLY RHYTHM</span>
-          </div>
-        </div>
-
-        <div className="profile__status">
-          <span>NOW</span>
-          <p>{PROFILE.status}</p>
         </div>
       </div>
     </section>
   );
 }
 
-function Skills() {
+function Toolkit() {
+  const groups = useMemo(
+    () => [
+      { label: "Build", items: SUBSTANCES.slice(0, 5) },
+      { label: "Engineer", items: SUBSTANCES.slice(5, 10) },
+      { label: "Explore", items: SUBSTANCES.slice(10) },
+    ],
+    [],
+  );
   return (
-    <section className="skills" id="skills">
-      <div className="skills__heading">
-        <p className="section-label">04 / CAPABILITY FIELD</p>
-        <h2>Tools with mileage.</h2>
-        <p>Grouped honestly by confidence, not padded for keyword count.</p>
+    <section id="toolkit" className="toolkit-section">
+      <div className="toolkit-title">
+        <p className="eyebrow">03 / Toolkit</p>
+        <h2>
+          What I use
+          <br />
+          to make ideas real.
+        </h2>
       </div>
-
-      <div className="skill-rows">
-        {SKILL_GROUPS.map((group, index) => (
-          <div className="skill-row" key={group.title}>
-            <div className="skill-row__meta">
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <p>{group.title}</p>
+      <div className="tool-groups">
+        {groups.map((group, groupIndex) => (
+          <div className="tool-group" key={group.label}>
+            <div className="tool-group-head">
+              <span>0{groupIndex + 1}</span>
+              <h3>{group.label}</h3>
             </div>
-            <div className="skill-row__track">
-              <div className="skill-row__items">
-                {group.items.map((item) => (
-                  <span key={item}>{item}</span>
-                ))}
+            {group.items.map((item) => (
+              <div className="tool-row" key={item.code}>
+                <span className="tool-code">{item.code}</span>
+                <span>{item.name}</span>
+                <small>{item.finding}</small>
               </div>
-            </div>
+            ))}
           </div>
         ))}
       </div>
@@ -454,93 +367,53 @@ function Skills() {
 
 function Journey() {
   return (
-    <section className="journey" id="journey">
-      <div className="journey__header">
-        <p className="section-label">05 / TRAJECTORY</p>
-        <h2>The route so far.</h2>
+    <section className="journey-section">
+      <div className="journey-title">
+        <p className="eyebrow">04 / Trajectory</p>
+        <h2>
+          Learning in public.
+          <br />
+          Building for real.
+        </h2>
+        <p>
+          Software foundations first. Applied AI next. A record of steady motion, not overnight
+          expertise.
+        </p>
       </div>
-
-      <div className="timeline">
-        {CAREER_TIMELINE.map((item, index) => (
-          <motion.article
-            key={item.period}
-            className="timeline__item"
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.5 }}
-            transition={{ duration: 0.55, delay: index * 0.08, ease: EASE }}
-          >
-            <span className="timeline__number">{String(index + 1).padStart(2, "0")}</span>
-            <span className="timeline__period">{item.period}</span>
+      <div className="journey-list">
+        {LEDGER.map((item, index) => (
+          <article key={item.period}>
+            <span className="journey-index">0{index + 1}</span>
             <div>
-              <h3>{item.title}</h3>
+              <p>{item.period}</p>
+              <h3>{item.role}</h3>
+            </div>
+            <div>
+              <strong>{item.org}</strong>
               <p>{item.body}</p>
             </div>
-          </motion.article>
+          </article>
         ))}
       </div>
-    </section>
-  );
-}
-
-function Credentials() {
-  const visualCredentials = CERTIFICATIONS.filter((credential) => "image" in credential);
-  const compactCredentials = CERTIFICATIONS.filter((credential) => !("image" in credential));
-
-  return (
-    <section className="credentials" id="credentials">
-      <div className="credentials__header">
-        <p className="section-label">06 / SIGNALS OF PROGRESS</p>
-        <h2>Learning in public.</h2>
-      </div>
-
-      <div className="credential-grid">
-        {visualCredentials.map((credential, index) => {
-          const card = (
-            <>
-              <div className="credential-card__image">
-                <img
-                  src={credential.image}
-                  alt={`${credential.title} certificate`}
-                  loading="lazy"
-                />
-              </div>
-              <span>
-                {String(index + 1).padStart(2, "0")} / {credential.date}
-              </span>
+      <div className="credentials">
+        <div className="credentials-head">
+          <span className="eyebrow">Credentials / Recent</span>
+          <span>{CREDENTIALS.length} completed</span>
+        </div>
+        <div className="credential-grid">
+          {CREDENTIALS.map((credential, index) => (
+            <article key={credential.title}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
               <h3>{credential.title}</h3>
               <p>{credential.issuer}</p>
-            </>
-          );
-
-          return "verify" in credential ? (
-            <a
-              className="credential-card"
-              href={credential.verify}
-              target="_blank"
-              rel="noreferrer"
-              key={credential.title}
-            >
-              {card}
-              <ArrowUpRight aria-hidden="true" />
-            </a>
-          ) : (
-            <article className="credential-card" key={credential.title}>
-              {card}
+              <small>{credential.date}</small>
             </article>
-          );
-        })}
-      </div>
-
-      <div className="credential-notes">
-        <div>
-          <span>ALSO ON RECORD</span>
-          <p>{compactCredentials.map((item) => item.title).join(" / ")}</p>
+          ))}
         </div>
-        <div>
-          <span>NEXT IN LINE</span>
-          <p>{IN_PROGRESS_CERTS.join(" / ")}</p>
-        </div>
+        <p className="in-progress">
+          <span>In progress</span>
+          {IN_PROGRESS.join(" · ")}
+        </p>
       </div>
     </section>
   );
@@ -548,212 +421,62 @@ function Credentials() {
 
 function Contact() {
   return (
-    <footer className="contact" id="contact">
-      <div className="contact__orbit" aria-hidden="true">
-        <span />
-        <span />
+    <footer id="contact" className="contact-section">
+      <div className="contact-top">
+        <p className="eyebrow">05 / Contact</p>
+        <span>Vadodara, IN · Remote friendly</span>
       </div>
-      <div className="contact__top">
-        <p className="section-label">07 / OPEN CHANNEL</p>
-        <span>{PROFILE.replyTime}</span>
-      </div>
-
       <h2>
-        LET&apos;S BUILD
+        Let’s build
         <br />
-        <em>THE NEXT THING.</em>
+        <em>something useful.</em>
       </h2>
-
-      <a className="contact__email" href={`mailto:${PROFILE.email}`}>
-        <span>{PROFILE.email}</span>
-        <ArrowUpRight aria-hidden="true" />
-      </a>
-
-      <div className="contact__footer">
-        <div className="contact__links">
-          <a href={PROFILE.github} target="_blank" rel="noreferrer">
-            <Github aria-hidden="true" /> GitHub
+      <div className="contact-actions">
+        <a className="contact-email" href={`mailto:${SUBJECT.email}`}>
+          {SUBJECT.email}
+          <ArrowUpRight />
+        </a>
+        <div className="socials">
+          <a href={SUBJECT.github} target="_blank" rel="noreferrer">
+            <Github /> GitHub
           </a>
-          <a href={PROFILE.linkedin} target="_blank" rel="noreferrer">
-            <Linkedin aria-hidden="true" /> LinkedIn
+          <a href={SUBJECT.linkedin} target="_blank" rel="noreferrer">
+            <Linkedin /> LinkedIn
           </a>
-          <a href={PROFILE.resume} target="_blank" rel="noreferrer">
-            <Download aria-hidden="true" /> Resume
+          <a href={SUBJECT.resume} target="_blank" rel="noreferrer">
+            <ArrowUpRight /> Résumé
           </a>
         </div>
-        <p>
-          {PROFILE.location}
-          <br />
-          {PROFILE.timezone}
-        </p>
+      </div>
+      <div className="footer-line">
+        <span>© {new Date().getFullYear()} Dev Patel</span>
+        <span>Designed & engineered in India</span>
         <a href="#top">
-          BACK TO ORBIT <ArrowUpRight aria-hidden="true" />
+          Back to top <ArrowDown className="back-arrow" size={16} />
         </a>
       </div>
     </footer>
   );
 }
 
-function ProjectStory({
-  project,
-  imageIndex,
-  setImageIndex,
-  onClose,
-  reduceMotion,
-}: {
-  project: Project;
-  imageIndex: number;
-  setImageIndex: (index: number) => void;
-  onClose: () => void;
-  reduceMotion: boolean;
-}) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
-  const next = () => setImageIndex((imageIndex + 1) % project.images.length);
-  const previous = () =>
-    setImageIndex((imageIndex - 1 + project.images.length) % project.images.length);
-
-  useEffect(() => {
-    const resetScroll = () => {
-      if (overlayRef.current) overlayRef.current.scrollTop = 0;
-    };
-
-    resetScroll();
-    closeRef.current?.focus({ preventScroll: true });
-    const frame = window.requestAnimationFrame(resetScroll);
-    const settleTimer = window.setTimeout(resetScroll, reduceMotion ? 0 : 750);
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.clearTimeout(settleTimer);
-    };
-  }, [project.id, reduceMotion]);
-
+function Portfolio() {
   return (
-    <motion.div
-      ref={overlayRef}
-      className="story-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`${project.name} project story`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: reduceMotion ? 0 : 0.35 }}
-      onMouseDown={(event) => {
-        if (event.currentTarget === event.target) onClose();
-      }}
-    >
-      <motion.article
-        className="story"
-        initial={{ y: reduceMotion ? 0 : "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: reduceMotion ? 0 : "100%" }}
-        transition={{ duration: reduceMotion ? 0 : 0.7, ease: EASE }}
-      >
-        <header className="story__header">
-          <div>
-            <FieldMark />
-            <span>PROJECT STORY / {project.year}</span>
-          </div>
-          <button ref={closeRef} onClick={onClose} aria-label="Close project story">
-            CLOSE <X aria-hidden="true" />
-          </button>
-        </header>
-
-        <div className="story__title">
-          <span>SELECTED SYSTEM / {project.id.toUpperCase()}</span>
-          <h2>{project.name}</h2>
-        </div>
-
-        <div className="story__visual">
-          <AnimatePresence mode="wait">
-            <motion.img
-              key={project.images[imageIndex]}
-              layoutId={imageIndex === 0 ? `project-image-${project.id}` : undefined}
-              src={project.images[imageIndex]}
-              alt={`${project.name} screen ${imageIndex + 1} of ${project.images.length}`}
-              initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: reduceMotion ? 0 : 0.35 }}
-            />
-          </AnimatePresence>
-          <div className="story__controls">
-            <button onClick={previous} aria-label="Previous screenshot">
-              <ArrowLeft aria-hidden="true" />
-            </button>
-            <span>
-              {String(imageIndex + 1).padStart(2, "0")} /{" "}
-              {String(project.images.length).padStart(2, "0")}
-            </span>
-            <button onClick={next} aria-label="Next screenshot">
-              <ArrowRight aria-hidden="true" />
-            </button>
-          </div>
-        </div>
-
-        <div className="story__body">
-          <p className="story__summary">{project.summary}</p>
-          <div>
-            <span className="story__label">WHY IT MATTERS</span>
-            <p>{project.highlight}</p>
-          </div>
-          <div>
-            <span className="story__label">BUILT WITH</span>
-            <div className="story__tags">
-              {project.stack.map((item) => (
-                <span key={item}>{item}</span>
-              ))}
-            </div>
-          </div>
-          <a href={project.repo} target="_blank" rel="noreferrer" className="story__repo">
-            <Github aria-hidden="true" /> VIEW SOURCE <ArrowUpRight aria-hidden="true" />
-          </a>
-        </div>
-      </motion.article>
-    </motion.div>
-  );
-}
-
-function Reveal({ children }: { children: ReactNode }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 36 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.45 }}
-      transition={{ duration: 0.7, ease: EASE }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-function CursorHalo({ label }: { label: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const move = (event: PointerEvent) => {
-      if (!ref.current) return;
-      ref.current.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0)`;
-    };
-    window.addEventListener("pointermove", move, { passive: true });
-    return () => window.removeEventListener("pointermove", move);
-  }, []);
-
-  return (
-    <div ref={ref} className="cursor-halo" data-active={Boolean(label)} aria-hidden="true">
-      <span>{label}</span>
+    <div className="portfolio-shell">
+      <ScrollProgress />
+      <SiteNav />
+      <main>
+        <Hero />
+        <Statement />
+        <Marquee />
+        <Work />
+        <About />
+        <Toolkit />
+        <Journey />
+      </main>
+      <Contact />
+      <a className="floating-mail" href={`mailto:${SUBJECT.email}`} aria-label="Email Dev Patel">
+        <Mail size={19} />
+      </a>
     </div>
-  );
-}
-
-function FieldMark() {
-  return (
-    <svg className="field-mark" viewBox="0 0 52 52" aria-hidden="true">
-      <circle cx="26" cy="26" r="20" />
-      <path d="M9 34 38 10M18 43l25-21" />
-      <circle cx="39" cy="12" r="3" className="field-mark__dot" />
-    </svg>
   );
 }

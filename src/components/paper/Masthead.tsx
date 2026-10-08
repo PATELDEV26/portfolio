@@ -112,10 +112,7 @@ export function Masthead() {
       </div>
 
       {menuOpen ? (
-        <div
-          id="mobile-nav"
-          className="border-t border-ink bg-paper md:hidden"
-        >
+        <div id="mobile-nav" className="border-t border-ink bg-paper md:hidden">
           <ul className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
             {NAV.map((n) => (
               <li key={n.href} className="border-b border-rule last:border-0">

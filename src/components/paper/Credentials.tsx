@@ -19,10 +19,7 @@ export function Credentials() {
 
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {CREDENTIALS.filter((c) => SCANS[c.title]).map((c) => (
-            <figure
-              key={c.title}
-              className="border border-ink bg-card p-3"
-            >
+            <figure key={c.title} className="border border-ink bg-card p-3">
               <div className="overflow-hidden border border-rule bg-paper">
                 <img
                   src={SCANS[c.title]}

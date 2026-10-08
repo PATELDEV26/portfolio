@@ -110,11 +110,7 @@ export const EXHIBITS: Exhibit[] = [
     letter: "D",
     source: "github.com/PATELDEV26/NeonTalk",
     repo: "https://github.com/PATELDEV26/NeonTalk",
-    images: [
-      "/exhibits/neontalk/01.jpg",
-      "/exhibits/neontalk/02.jpg",
-      "/exhibits/neontalk/03.jpg",
-    ],
+    images: ["/exhibits/neontalk/01.jpg", "/exhibits/neontalk/02.jpg", "/exhibits/neontalk/03.jpg"],
     title: "NeonTalk",
     kicker: "Real-time chat · multi-room",
     body: "Full-stack real-time chat with a cyberpunk access screen and live rooms. Built to understand bi-directional communication properly — concurrent users, join/leave events and message broadcasting.",
@@ -145,11 +141,7 @@ export const EXHIBITS: Exhibit[] = [
     letter: "F",
     source: "github.com/PATELDEV26/Litera",
     repo: "https://github.com/PATELDEV26/Litera",
-    images: [
-      "/exhibits/litera/02.jpg",
-      "/exhibits/litera/01.jpg",
-      "/exhibits/litera/03.jpg",
-    ],
+    images: ["/exhibits/litera/02.jpg", "/exhibits/litera/01.jpg", "/exhibits/litera/03.jpg"],
     title: "Litera",
     kicker: "Document parse · minimal UI",
     body: "A clean document workspace for uploading and parsing CVs or files — drop zone first, chrome second. Focused on a calm editorial interface rather than another noisy SaaS shell.",
@@ -219,11 +211,7 @@ export const CREDENTIALS: Credential[] = [
   },
 ];
 
-export const IN_PROGRESS = [
-  "Google AI",
-  "IBM AI Fundamentals",
-  "Microsoft Azure AI Fundamentals",
-];
+export const IN_PROGRESS = ["Google AI", "IBM AI Fundamentals", "Microsoft Azure AI Fundamentals"];
 
 export const LEDGER = [
   {

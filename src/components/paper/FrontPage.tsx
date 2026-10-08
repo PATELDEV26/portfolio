@@ -54,7 +54,9 @@ export function FrontPage() {
             <dl className="mt-8 grid grid-cols-2 gap-px border border-rule bg-rule sm:mt-10 sm:grid-cols-4">
               {WEATHER.map((w) => (
                 <div key={w.k} className="bg-paper px-3 py-3.5 sm:py-4">
-                  <dt className="font-display text-base font-black leading-none sm:text-lg">{w.k}</dt>
+                  <dt className="font-display text-base font-black leading-none sm:text-lg">
+                    {w.k}
+                  </dt>
                   <dd className="mt-2 text-[11px] leading-snug text-ink-soft sm:text-xs">{w.v}</dd>
                 </div>
               ))}

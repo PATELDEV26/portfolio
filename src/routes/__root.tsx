@@ -73,18 +73,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Dev Patel | Full-Stack Developer & AI Engineer" },
+      { title: "Dev Patel — AI Engineer & Full-Stack Builder" },
+      { name: "theme-color", content: "#10100f" },
       {
         name: "description",
         content:
-          "Portfolio of Dev Patel, a full-stack developer in Vadodara building expressive digital products with React, TypeScript, Node, Python, and AI.",
+          "Dev Patel is an AI-minded full-stack engineer building useful systems with Python, React, TypeScript, Node, and applied machine learning.",
       },
       { name: "author", content: "Dev Patel" },
-      { property: "og:title", content: "Dev Patel | The Dev Field" },
+      { property: "og:title", content: "Dev Patel — AI Engineer & Full-Stack Builder" },
       {
         property: "og:description",
         content:
-          "Selected systems, experiments, and the story of a full-stack developer moving toward AI engineering.",
+          "Selected systems, experiments, and the work of a full-stack developer moving toward AI engineering.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -97,10 +98,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "shortcut icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,ital,wght@6..96,0,400..900;6..96,1,400..900&family=Manrope:wght@400;500;600;700;800&display=swap",
-      },
     ],
   }),
   shellComponent: RootShell,

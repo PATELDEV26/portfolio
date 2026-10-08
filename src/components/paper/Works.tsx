@@ -2,13 +2,7 @@ import { useState } from "react";
 import { EXHIBITS, type Exhibit } from "@/content/dossier";
 import { SectionHead } from "./SectionHead";
 
-function ExhibitGallery({
-  exhibit,
-  priority,
-}: {
-  exhibit: Exhibit;
-  priority?: boolean;
-}) {
+function ExhibitGallery({ exhibit, priority }: { exhibit: Exhibit; priority?: boolean }) {
   const [active, setActive] = useState(0);
   const shots = exhibit.images;
   const current = shots[active] ?? shots[0];
@@ -130,8 +124,7 @@ export function Works() {
                       {ex.live ? "View source" : "View on GitHub"}
                     </a>
                     <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-soft sm:ml-auto">
-                      {String(i + 1).padStart(2, "0")} /{" "}
-                      {String(EXHIBITS.length).padStart(2, "0")}
+                      {String(i + 1).padStart(2, "0")} / {String(EXHIBITS.length).padStart(2, "0")}
                     </span>
                   </div>
 
