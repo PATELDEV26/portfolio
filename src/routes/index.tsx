@@ -1,24 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { motion, useScroll, useSpring } from "framer-motion";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
 import {
   ArrowDown,
-  ArrowUpRight,
+  Activity,
+  BrainCircuit,
   Braces,
-  ChevronLeft,
-  ChevronRight,
+  Code2,
+  Database,
   Github,
+  Layers3,
   Linkedin,
   Mail,
   Menu,
+  Radio,
   X,
 } from "lucide-react";
 
 import { CREDENTIALS, EXHIBITS, IN_PROGRESS, LEDGER, SUBJECT, SUBSTANCES } from "@/content/dossier";
 
 export const Route = createFileRoute("/")({ component: Portfolio });
-
-const PROJECT_COLORS = ["#e8a11b", "#de5d3f", "#8cb0c7", "#d4c0a9", "#b7c957", "#ece5d7"];
 
 function ScrollProgress() {
   const { scrollYProgress } = useScroll();
@@ -29,7 +30,7 @@ function ScrollProgress() {
 function SiteNav() {
   const [open, setOpen] = useState(false);
   const links = [
-    ["Work", "#work"],
+    ["Projects", "#projects"],
     ["About", "#about"],
     ["Toolkit", "#toolkit"],
     ["Contact", "#contact"],
@@ -94,9 +95,39 @@ function SiteNav() {
 
 function Hero() {
   const [active, setActive] = useState(0);
+  const [frame, setFrame] = useState(0);
+  const [powered, setPowered] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const project = EXHIBITS[active];
+
+  useEffect(() => {
+    setShowGuide(window.localStorage.getItem("dev-patel-tv-started") !== "yes");
+  }, []);
+
+  const togglePower = () => {
+    const next = !powered;
+    if (next) {
+      window.localStorage.setItem("dev-patel-tv-started", "yes");
+      setShowGuide(false);
+    }
+    setPowered(next);
+  };
+
   const changeChannel = (direction: number) => {
+    if (!powered) return;
     setActive((current) => (current + direction + EXHIBITS.length) % EXHIBITS.length);
+    setFrame(0);
+  };
+
+  const selectChannel = (index: number) => {
+    if (!powered) return;
+    setActive(index);
+    setFrame(0);
+  };
+
+  const changeFrame = () => {
+    if (!powered) return;
+    setFrame((current) => (current + 1) % project.images.length);
   };
 
   return (
@@ -111,55 +142,139 @@ function Hero() {
 
       <h1 className="sr-only">Dev Patel — AI engineer and full-stack builder</h1>
 
-      <div className="tv-stage">
+      <div
+        className="tv-stage"
+        tabIndex={0}
+        role="group"
+        aria-label="Interactive project television. Use the left and right arrow keys to change channels."
+        onKeyDown={(event) => {
+          if (event.key === "ArrowLeft") changeChannel(-1);
+          if (event.key === "ArrowRight") changeChannel(1);
+          if (event.key === "ArrowUp") changeFrame();
+        }}
+      >
         <img
           className="tv-shell-image"
-          src="/ai-terminal-hero.png"
+          src="/ai-terminal-hero-v2.png"
           alt="A retro-futuristic orange AI terminal in a dark engineering studio"
         />
-        <div className="tv-screen" aria-live="polite">
-          <img
-            key={project.id}
-            src={project.images[0]}
-            alt={`${project.title} project interface`}
-          />
+        <div className={`tv-screen ${powered ? "is-on" : "is-off"}`} aria-live="polite">
+          {powered ? (
+            <>
+              <img
+                key={`${project.id}-${frame}`}
+                src={project.images[frame]}
+                alt={`${project.title} project interface`}
+              />
+              <div className="tv-screen-meta">
+                <span>CH {String(active + 1).padStart(2, "0")} · INPUT DEV</span>
+                <span>
+                  {frame + 1}/{project.images.length}
+                </span>
+              </div>
+              <div className="tv-screen-title">
+                <span>{project.period} / PROJECT SIGNAL</span>
+                <strong>{project.title}</strong>
+              </div>
+              <a href={project.repo} target="_blank" rel="noreferrer" className="tv-open-project">
+                View source
+              </a>
+            </>
+          ) : (
+            <div className="tv-off-screen">
+              <span>STANDBY</span>
+              <strong>NO SIGNAL</strong>
+              <small>PRESS POWER TO BEGIN</small>
+            </div>
+          )}
+          <div className="tv-glass-reflection" aria-hidden="true" />
           <div className="tv-scanlines" aria-hidden="true" />
-          <div className="tv-screen-meta">
-            <span>CH {String(active + 1).padStart(2, "0")}</span>
-            <span>{project.kicker}</span>
-          </div>
-          <a href={project.repo} target="_blank" rel="noreferrer" className="tv-open-project">
-            Open project <ArrowUpRight size={15} />
-          </a>
         </div>
+        <div className="tv-lcd" aria-hidden="true">
+          <span>{powered ? `CH${String(active + 1).padStart(2, "0")}` : "PWR"}</span>
+          <strong>{powered ? project.title.toUpperCase() : "STANDBY"}</strong>
+        </div>
+        <button
+          className={`tv-power-button ${powered ? "is-on" : ""}`}
+          onClick={togglePower}
+          aria-label={powered ? "Turn television off" : "Turn television on"}
+          aria-pressed={powered}
+        >
+          <span className="sr-only">{powered ? "Power off" : "Power on"}</span>
+        </button>
+        <button
+          className="tv-hardware-button tv-hardware-frame"
+          onClick={changeFrame}
+          disabled={!powered}
+          aria-label={`Show next ${project.title} screen`}
+        />
         <button
           className="tv-hardware-button tv-hardware-prev"
           onClick={() => changeChannel(-1)}
+          disabled={!powered}
           aria-label="Previous project channel"
-        >
-          <ChevronLeft />
-        </button>
+        />
         <button
           className="tv-hardware-button tv-hardware-next"
           onClick={() => changeChannel(1)}
+          disabled={!powered}
           aria-label="Next project channel"
-        >
-          <ChevronRight />
-        </button>
+        />
+        {showGuide && !powered && (
+          <div className="tv-start-guide" role="status">
+            <span>FIRST VISIT / START HERE</span>
+            <strong>Wake up the TV.</strong>
+            <p>
+              Press the glowing round power button. Then use the three black buttons to browse
+              projects.
+            </p>
+            <button onClick={togglePower}>Power on TV</button>
+          </div>
+        )}
       </div>
 
-      <div className="tv-channel-bar">
-        <button onClick={() => changeChannel(-1)} aria-label="Previous channel">
-          <ChevronLeft />
-        </button>
-        <div>
-          <span>NOW PLAYING / {String(active + 1).padStart(2, "0")}</span>
-          <strong>{project.title}</strong>
+      <div id="projects" className={`tv-program-guide ${powered ? "is-on" : "is-off"}`}>
+        <div className="tv-program-head">
+          <div>
+            <span>
+              {powered
+                ? `NOW PLAYING / CHANNEL ${String(active + 1).padStart(2, "0")}`
+                : "RECEIVER / STANDBY"}
+            </span>
+            <strong>{powered ? project.title : "Signal offline"}</strong>
+          </div>
+          <p>{powered ? project.kicker : "Press power to tune in"}</p>
         </div>
-        <p>{project.body}</p>
-        <button onClick={() => changeChannel(1)} aria-label="Next channel">
-          <ChevronRight />
-        </button>
+        <p className="tv-program-copy">
+          {powered
+            ? project.body
+            : "The project channels are waiting. Start the television with the glowing button, then tune through six selected builds."}
+        </p>
+        <ul className="tv-program-stack" aria-label={`${project.title} technologies`}>
+          {(powered ? project.stack : ["Power", "Tune", "Explore"]).map((technology) => (
+            <li key={technology}>{technology}</li>
+          ))}
+        </ul>
+        <div className="tv-channel-select" aria-label="Project channels">
+          {EXHIBITS.map((channel, index) => (
+            <button
+              key={channel.id}
+              className={index === active ? "is-active" : ""}
+              onClick={() => selectChannel(index)}
+              disabled={!powered}
+              aria-label={`Tune to ${channel.title}`}
+              aria-pressed={index === active}
+            >
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              {channel.title}
+            </button>
+          ))}
+        </div>
+        <div className="tv-control-legend" aria-label="Television controls">
+          <span>▲ Next screen</span>
+          <span>◀ ▶ Change project</span>
+          <span>● Power</span>
+        </div>
       </div>
 
       <a className="tv-scroll" href="#statement">
@@ -171,23 +286,49 @@ function Hero() {
 
 function Statement() {
   return (
-    <section id="statement" className="statement-section">
-      <p className="eyebrow">What I do / Why it matters</p>
-      <h2>
-        Software with
-        <br />
-        <em>intelligence</em>
-        <br />
-        built in.
-      </h2>
-      <div>
-        <p>
-          I turn rough ideas into working products—then add the data, automation and AI that make
-          them more useful.
+    <section id="statement" className="field-intro">
+      <div className="field-intro-rail" aria-hidden="true">
+        <span>FIELD MANUAL</span>
+        <span>VOL. 01 / 2026</span>
+      </div>
+      <Reveal className="field-intro-main">
+        <p className="eyebrow">Beyond the screen / How I think</p>
+        <h2>
+          Useful software.
+          <br />
+          <em>Intelligence</em> where
+          <br />
+          it earns its place.
+        </h2>
+        <p className="field-intro-summary">
+          I turn unclear problems into working systems—then use data, automation and AI where they
+          create a real advantage, not just a headline.
         </p>
-        <a href="#work">
-          Explore the case files <ArrowDown size={16} />
-        </a>
+      </Reveal>
+      <div className="field-principles">
+        {[
+          [
+            "01",
+            "Understand first",
+            "Start with the person, the constraint and the actual job to be done.",
+          ],
+          [
+            "02",
+            "Engineer the core",
+            "Build the data flow, product logic and interfaces as one connected system.",
+          ],
+          [
+            "03",
+            "Make it obvious",
+            "A smart product still has to feel calm, fast and natural to use.",
+          ],
+        ].map(([number, title, body]) => (
+          <Reveal className="field-principle" key={number}>
+            <span>{number}</span>
+            <h3>{title}</h3>
+            <p>{body}</p>
+          </Reveal>
+        ))}
       </div>
     </section>
   );
@@ -195,9 +336,10 @@ function Statement() {
 
 function Marquee() {
   const text =
-    "PYTHON · REACT · TYPESCRIPT · NODE · GENERATIVE AI · WEBSOCKETS · PRODUCT THINKING · ";
+    "FRAME THE PROBLEM  /  BUILD THE SYSTEM  /  TEST THE EDGE CASES  /  SHIP THE USEFUL THING  /  ";
   return (
-    <div className="marquee" aria-label={text}>
+    <div className="marquee data-tape" aria-label={text}>
+      <span className="data-tape-label">LIVE PROCESS</span>
       <div className="marquee-track">
         <span>{text}</span>
         <span aria-hidden="true">{text}</span>
@@ -206,120 +348,138 @@ function Marquee() {
   );
 }
 
-function Work() {
+function About() {
   return (
-    <section id="work" className="work-section">
-      <div className="section-intro">
-        <p className="eyebrow">01 / Selected systems</p>
-        <h2>
-          Proof lives
-          <br />
-          in the build.
-        </h2>
-        <p className="section-copy">
-          Six end-to-end projects across machine learning, real-time systems, tooling and interface
-          engineering.
-        </p>
-      </div>
-      <div className="case-stack">
-        {EXHIBITS.map((project, index) => (
-          <article
-            className="case-card"
-            key={project.id}
-            style={
-              {
-                "--case-color": PROJECT_COLORS[index],
-                "--case-offset": `${84 + Math.min(index, 3) * 9}px`,
-              } as React.CSSProperties
-            }
-          >
-            <div className="case-number">{String(index + 1).padStart(2, "0")}</div>
-            <div className="case-media">
-              <img
-                src={project.images[0]}
-                alt={`${project.title} interface`}
-                loading={index < 2 ? "eager" : "lazy"}
-              />
-              <span className="case-year">{project.period}</span>
+    <section id="about" className="operator-section">
+      <div className="operator-grid">
+        <Reveal className="operator-heading">
+          <p className="eyebrow">01 / Human in the loop</p>
+          <h2>
+            Meet the
+            <br />
+            <em>operator.</em>
+          </h2>
+          <p>
+            Final-year computer science student. Full-stack builder. Moving deliberately toward AI
+            engineering—one shipped system at a time.
+          </p>
+        </Reveal>
+
+        <Reveal className="operator-visual">
+          <div className="portrait-scanner">
+            <img src="/media/dev-photo.jpg" alt="Dev Patel" loading="lazy" />
+            <div className="scanner-line" aria-hidden="true" />
+            <span className="scanner-corner scanner-corner-a" aria-hidden="true" />
+            <span className="scanner-corner scanner-corner-b" aria-hidden="true" />
+            <span className="operator-id">DP / 027</span>
+            <span className="operator-status">
+              <i /> AVAILABLE
+            </span>
+          </div>
+          <figcaption>DEV PATEL · VADODARA, INDIA · REMOTE FRIENDLY</figcaption>
+        </Reveal>
+
+        <Reveal className="operator-log">
+          <div className="operator-log-head">
+            <Radio size={16} />
+            <span>OPERATOR LOG / CURRENT SIGNAL</span>
+          </div>
+          <p className="operator-lead">
+            I learn best by building the entire product, not isolated demos.
+          </p>
+          <p>
+            That has meant making recommendation logic matter to the interface, handling live state
+            in a chat system, animating algorithms so their behavior is visible, and turning repeat
+            scripts into usable tools.
+          </p>
+          <p>
+            I care about the full arc: understanding the problem, structuring the system, testing
+            assumptions and making the final experience feel obvious.
+          </p>
+          <dl className="operator-facts">
+            <div>
+              <dt>Products shipped</dt>
+              <dd>06</dd>
             </div>
-            <div className="case-info">
-              <div>
-                <p className="eyebrow">{project.kicker}</p>
-                <h3>{project.title}</h3>
-              </div>
-              <p className="case-description">{project.body}</p>
-              <div className="case-bottom">
-                <ul>
-                  {project.stack.map((tech) => (
-                    <li key={tech}>{tech}</li>
-                  ))}
-                </ul>
-                <a
-                  href={project.repo}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={`View ${project.title} on GitHub`}
-                >
-                  View source <ArrowUpRight size={18} />
-                </a>
-              </div>
+            <div>
+              <dt>Graduating</dt>
+              <dd>2027</dd>
             </div>
-          </article>
-        ))}
+            <div>
+              <dt>Current vector</dt>
+              <dd>AI ENG.</dd>
+            </div>
+          </dl>
+        </Reveal>
       </div>
     </section>
   );
 }
 
-function About() {
+const PROCESS = [
+  {
+    code: "P-01",
+    title: "Frame",
+    body: "Turn a vague request into a clear user, constraint and success condition.",
+    output: "Problem map",
+  },
+  {
+    code: "P-02",
+    title: "Prototype",
+    body: "Find the smallest honest version that can prove the risky part of the idea.",
+    output: "Working proof",
+  },
+  {
+    code: "P-03",
+    title: "Engineer",
+    body: "Connect interface, data and backend with maintainable boundaries and useful feedback.",
+    output: "System core",
+  },
+  {
+    code: "P-04",
+    title: "Evaluate",
+    body: "Test behavior, edge cases and—when AI is involved—the quality of the output itself.",
+    output: "Evidence",
+  },
+  {
+    code: "P-05",
+    title: "Ship",
+    body: "Polish the details, deploy the product and learn from how it behaves in the real world.",
+    output: "Live product",
+  },
+];
+
+function Process() {
   return (
-    <section id="about" className="about-section">
-      <div className="about-heading">
-        <p className="eyebrow">02 / Operating principle</p>
-        <h2>
-          Curious enough
-          <br />
-          to go deep.
-          <br />
-          <em>Practical enough</em>
-          <br />
-          to ship.
-        </h2>
-      </div>
-      <div className="about-body">
-        <figure className="portrait-wrap">
-          <img src="/media/dev-photo.jpg" alt="Dev Patel" loading="lazy" />
-          <figcaption>Dev Patel / Vadodara, India</figcaption>
-        </figure>
-        <div className="about-copy">
-          <p className="about-lead">
-            I’m a final-year computer science student building toward AI engineering from a strong
-            full-stack base.
-          </p>
-          <p>
-            My best learning happens inside real products: a recommender where the maths drives the
-            experience, a chat app that handles live state, a visualiser that turns algorithms into
-            motion, or a scraper that replaces repetitive work.
-          </p>
-          <p>
-            I care about the full arc—from understanding the problem and structuring the system to
-            making the interface feel obvious.
-          </p>
-          <div className="about-facts">
-            <div>
-              <strong>06</strong>
-              <span>Independent products</span>
-            </div>
-            <div>
-              <strong>2027</strong>
-              <span>CSE graduation</span>
-            </div>
-            <div>
-              <strong>24h</strong>
-              <span>Typical reply time</span>
-            </div>
-          </div>
+    <section className="process-section" aria-labelledby="process-title">
+      <Reveal className="process-heading">
+        <div>
+          <p className="eyebrow">02 / Build protocol</p>
+          <span className="process-state">
+            <i /> SYSTEMATIC, NOT STATIC
+          </span>
         </div>
+        <h2 id="process-title">How an idea becomes a system.</h2>
+        <p>
+          The tools change. The discipline does not. Each build moves through the same five gates,
+          with room to loop back when the evidence says so.
+        </p>
+      </Reveal>
+      <div className="process-list">
+        {PROCESS.map((step, index) => (
+          <motion.article
+            key={step.code}
+            initial={{ opacity: 0, x: -24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.45 }}
+            transition={{ duration: 0.5, delay: index * 0.05 }}
+          >
+            <span className="process-code">{step.code}</span>
+            <h3>{step.title}</h3>
+            <p>{step.body}</p>
+            <strong>{step.output}</strong>
+          </motion.article>
+        ))}
       </div>
     </section>
   );
@@ -335,30 +495,48 @@ function Toolkit() {
     [],
   );
   return (
-    <section id="toolkit" className="toolkit-section">
-      <div className="toolkit-title">
-        <p className="eyebrow">03 / Toolkit</p>
-        <h2>
-          What I use
-          <br />
-          to make ideas real.
-        </h2>
-      </div>
-      <div className="tool-groups">
+    <section id="toolkit" className="capability-section">
+      <Reveal className="capability-heading">
+        <div>
+          <p className="eyebrow">03 / Capability matrix</p>
+          <h2>
+            Built across
+            <br />
+            the whole stack.
+          </h2>
+        </div>
+        <p>
+          A practical toolkit shaped by shipped projects. Strongest in product engineering,
+          expanding into data and applied AI.
+        </p>
+      </Reveal>
+      <div className="capability-console">
+        <div className="capability-console-bar">
+          <span>
+            <i /> DEV_SYSTEMS / SKILL_SCAN
+          </span>
+          <span>14 SIGNALS DETECTED</span>
+        </div>
         {groups.map((group, groupIndex) => (
-          <div className="tool-group" key={group.label}>
-            <div className="tool-group-head">
-              <span>0{groupIndex + 1}</span>
+          <Reveal className="capability-group" key={group.label}>
+            <header>
+              <span>BUS_0{groupIndex + 1}</span>
               <h3>{group.label}</h3>
-            </div>
+              {groupIndex === 0 ? <Code2 /> : groupIndex === 1 ? <Layers3 /> : <BrainCircuit />}
+            </header>
             {group.items.map((item) => (
-              <div className="tool-row" key={item.code}>
-                <span className="tool-code">{item.code}</span>
-                <span>{item.name}</span>
-                <small>{item.finding}</small>
+              <div className="capability-row" key={item.code}>
+                <span className="capability-code">{item.code}</span>
+                <div>
+                  <strong>{item.name}</strong>
+                  <span className="capability-track" aria-hidden="true">
+                    <i />
+                  </span>
+                </div>
+                <small>{item.detected}</small>
               </div>
             ))}
-          </div>
+          </Reveal>
         ))}
       </div>
     </section>
@@ -367,53 +545,63 @@ function Toolkit() {
 
 function Journey() {
   return (
-    <section className="journey-section">
-      <div className="journey-title">
-        <p className="eyebrow">04 / Trajectory</p>
-        <h2>
-          Learning in public.
-          <br />
-          Building for real.
-        </h2>
+    <section className="signal-section">
+      <Reveal className="signal-heading">
+        <div>
+          <p className="eyebrow">04 / Signal log</p>
+          <span>
+            <Activity size={15} /> TRAJECTORY ACTIVE
+          </span>
+        </div>
+        <h2>Progress leaves a trace.</h2>
         <p>
-          Software foundations first. Applied AI next. A record of steady motion, not overnight
-          expertise.
+          Software foundations first. Applied AI next. This is a record of steady motion—not a claim
+          of overnight expertise.
         </p>
-      </div>
-      <div className="journey-list">
+      </Reveal>
+      <div className="signal-timeline">
         {LEDGER.map((item, index) => (
-          <article key={item.period}>
-            <span className="journey-index">0{index + 1}</span>
-            <div>
-              <p>{item.period}</p>
-              <h3>{item.role}</h3>
+          <Reveal className="signal-entry" key={item.period}>
+            <div className="signal-node">
+              <i />
+              <span>0{index + 1}</span>
             </div>
-            <div>
+            <div className="signal-period">{item.period}</div>
+            <div className="signal-role">
+              <h3>{item.role}</h3>
               <strong>{item.org}</strong>
+            </div>
+            <div className="signal-copy">
               <p>{item.body}</p>
             </div>
-          </article>
+          </Reveal>
         ))}
       </div>
-      <div className="credentials">
-        <div className="credentials-head">
-          <span className="eyebrow">Credentials / Recent</span>
-          <span>{CREDENTIALS.length} completed</span>
+      <div className="learning-board">
+        <div className="learning-board-head">
+          <div>
+            <Database size={17} />
+            <span>LEARNING ARCHIVE / VERIFIED INPUTS</span>
+          </div>
+          <span>{CREDENTIALS.length} RECORDS</span>
         </div>
-        <div className="credential-grid">
+        <div className="learning-grid">
           {CREDENTIALS.map((credential, index) => (
             <article key={credential.title}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
+              <span className="learning-index">REC-{String(index + 1).padStart(2, "0")}</span>
+              <small>{credential.date}</small>
               <h3>{credential.title}</h3>
               <p>{credential.issuer}</p>
-              <small>{credential.date}</small>
+              <p className="learning-detail">{credential.detail}</p>
             </article>
           ))}
         </div>
-        <p className="in-progress">
-          <span>In progress</span>
-          {IN_PROGRESS.join(" · ")}
-        </p>
+        <div className="learning-active">
+          <span>
+            <i /> CURRENTLY LOADING
+          </span>
+          <p>{IN_PROGRESS.join("  /  ")}</p>
+        </div>
       </div>
     </section>
   );
@@ -421,22 +609,33 @@ function Journey() {
 
 function Contact() {
   return (
-    <footer id="contact" className="contact-section">
-      <div className="contact-top">
-        <p className="eyebrow">05 / Contact</p>
-        <span>Vadodara, IN · Remote friendly</span>
+    <footer id="contact" className="channel-section">
+      <div className="channel-top">
+        <p className="eyebrow">05 / Open channel</p>
+        <span>
+          <i /> AVAILABLE FOR THE RIGHT BUILD
+        </span>
       </div>
       <h2>
-        Let’s build
+        Have a hard
         <br />
-        <em>something useful.</em>
+        problem? <em>Good.</em>
       </h2>
-      <div className="contact-actions">
-        <a className="contact-email" href={`mailto:${SUBJECT.email}`}>
-          {SUBJECT.email}
-          <ArrowUpRight />
+      <div className="channel-deck">
+        <div>
+          <p>
+            I’m looking for AI engineering internships, thoughtful freelance work and teams that
+            care about how the product actually feels.
+          </p>
+          <span>Usually replies within 24 hours · Vadodara / Remote</span>
+        </div>
+        <a className="channel-email" href={`mailto:${SUBJECT.email}`}>
+          <span>START A CONVERSATION</span>
+          <strong>{SUBJECT.email}</strong>
         </a>
-        <div className="socials">
+      </div>
+      <div className="channel-links">
+        <div className="channel-socials">
           <a href={SUBJECT.github} target="_blank" rel="noreferrer">
             <Github /> GitHub
           </a>
@@ -444,18 +643,34 @@ function Contact() {
             <Linkedin /> LinkedIn
           </a>
           <a href={SUBJECT.resume} target="_blank" rel="noreferrer">
-            <ArrowUpRight /> Résumé
+            <span className="resume-mark">CV</span> Résumé
           </a>
         </div>
-      </div>
-      <div className="footer-line">
-        <span>© {new Date().getFullYear()} Dev Patel</span>
-        <span>Designed & engineered in India</span>
-        <a href="#top">
-          Back to top <ArrowDown className="back-arrow" size={16} />
+        <a className="channel-top-link" href="#top">
+          BACK TO TOP
         </a>
       </div>
+      <div className="channel-footer">
+        <span>© {new Date().getFullYear()} Dev Patel</span>
+        <span>DESIGNED & ENGINEERED IN INDIA</span>
+        <span>AI SYSTEMS / FULL-STACK</span>
+      </div>
     </footer>
+  );
+}
+
+function Reveal({ children, className = "" }: { children: ReactNode; className?: string }) {
+  const reduceMotion = useReducedMotion();
+  return (
+    <motion.div
+      className={className}
+      initial={reduceMotion ? false : { opacity: 0, y: 28 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.18 }}
+      transition={{ duration: 0.62, ease: [0.2, 0.8, 0.2, 1] }}
+    >
+      {children}
+    </motion.div>
   );
 }
 
@@ -468,8 +683,8 @@ function Portfolio() {
         <Hero />
         <Statement />
         <Marquee />
-        <Work />
         <About />
+        <Process />
         <Toolkit />
         <Journey />
       </main>
