@@ -30,6 +30,6 @@ export default defineConfig({
       server: { entry: "server" },
     }),
     viteReact(),
-    nitro({ preset: "cloudflare_module" }),
+    nitro(),
   ],
 });
