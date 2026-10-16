@@ -101,7 +101,7 @@ export function Contact() {
                 </a>
                 <a
                   href={SUBJECT.resume}
-                  download="Dev_Patel_Resume_AI_Engineer.pdf"
+                  download="Dev_Patel_Resume_MS_Admissions_Updated.pdf"
                   target="_blank"
                   rel="noreferrer noopener"
                   className="border border-ink bg-ink px-3 py-2 label-kicker text-paper transition-colors hover:bg-stamp hover:border-stamp"

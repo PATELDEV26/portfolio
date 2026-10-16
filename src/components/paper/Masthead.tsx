@@ -70,7 +70,7 @@ export function Masthead() {
           </ul>
           <a
             href={SUBJECT.resume}
-            download="Dev_Patel_Resume_AI_Engineer.pdf"
+            download="Dev_Patel_Resume_MS_Admissions_Updated.pdf"
             className="hidden border border-ink px-3 py-2.5 label-kicker transition-colors hover:bg-ink hover:text-paper lg:inline-block"
           >
             Résumé
@@ -129,7 +129,7 @@ export function Masthead() {
           <div className="flex gap-2 border-t border-rule px-4 py-4 sm:px-6">
             <a
               href={SUBJECT.resume}
-              download="Dev_Patel_Resume_AI_Engineer.pdf"
+              download="Dev_Patel_Resume_MS_Admissions_Updated.pdf"
               onClick={closeMenu}
               className="flex min-h-11 flex-1 items-center justify-center border border-ink px-3 label-kicker"
             >

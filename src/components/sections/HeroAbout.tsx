@@ -233,7 +233,8 @@ export function HeroSection() {
                 <span>View My Work</span>
               </a>
               <a
-                href="/media/Dev_Patel_Resume_AI_Engineer.pdf"
+                href="/media/Dev_Patel_Resume_MS_Admissions_Updated.pdf"
+                download="Dev_Patel_Resume_MS_Admissions_Updated.pdf"
                 target="_blank"
                 rel="noreferrer"
                 className="btn-outline"

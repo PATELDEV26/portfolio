@@ -58,7 +58,7 @@ export const PROFILE = {
   email: "pateldev2317@gmail.com",
   github: "https://github.com/PATELDEV26",
   linkedin: "https://linkedin.com/in/dev-patel-66363b257",
-  resume: "/media/Dev_Patel_Resume_AI_Engineer.pdf",
+  resume: "/media/Dev_Patel_Resume_MS_Admissions_Updated.pdf",
   replyTime: "Usually replies within 24 hours.",
   bio: "I'm a final-year Computer Science Engineering student at Parul University in Vadodara, building full-stack web products with React, TypeScript, Node, and Postgres while moving toward AI engineering. I freelance for local shops and clinics around Vadodara, and I like taking ideas from a rough brief to a working, deployed product.",
   microPitch:

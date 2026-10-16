@@ -23,7 +23,7 @@ npx tsc --noEmit
 - Portfolio data: `src/content/metro.ts`
 - Main experience: `src/routes/index.tsx`
 - Visual system: `src/styles.css`
-- Resume: `public/media/Dev_Patel_Resume_AI_Engineer.pdf`
+- Resume: `public/media/Dev_Patel_Resume_MS_Admissions_Updated.pdf`
 - Portrait and certificates: `public/media/`
 - Project screenshots: `public/exhibits/<project-slug>/`
 

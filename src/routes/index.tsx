@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
 import {
   ArrowDown,
@@ -100,6 +100,9 @@ function Hero() {
   const [showGuide, setShowGuide] = useState(false);
   const project = EXHIBITS[active];
 
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+
   useEffect(() => {
     setShowGuide(window.localStorage.getItem("dev-patel-tv-started") !== "yes");
   }, []);
@@ -114,20 +117,68 @@ function Hero() {
   };
 
   const changeChannel = (direction: number) => {
-    if (!powered) return;
+    if (!powered) {
+      setPowered(true);
+      window.localStorage.setItem("dev-patel-tv-started", "yes");
+      setShowGuide(false);
+    }
     setActive((current) => (current + direction + EXHIBITS.length) % EXHIBITS.length);
     setFrame(0);
   };
 
   const selectChannel = (index: number) => {
-    if (!powered) return;
+    if (!powered) {
+      setPowered(true);
+      window.localStorage.setItem("dev-patel-tv-started", "yes");
+      setShowGuide(false);
+    }
     setActive(index);
     setFrame(0);
   };
 
   const changeFrame = () => {
-    if (!powered) return;
+    if (!powered) {
+      setPowered(true);
+      window.localStorage.setItem("dev-patel-tv-started", "yes");
+      setShowGuide(false);
+      return;
+    }
     setFrame((current) => (current + 1) % project.images.length);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    touchStartX.current = null;
+    touchStartY.current = null;
+
+    if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (!powered) {
+        setPowered(true);
+        window.localStorage.setItem("dev-patel-tv-started", "yes");
+        setShowGuide(false);
+      } else {
+        if (deltaX < 0) {
+          changeChannel(1);
+        } else {
+          changeChannel(-1);
+        }
+      }
+    }
+  };
+
+  const handleScreenClick = () => {
+    if (!powered) {
+      togglePower();
+    } else {
+      changeFrame();
+    }
   };
 
   return (
@@ -146,7 +197,7 @@ function Hero() {
         className="tv-stage"
         tabIndex={0}
         role="group"
-        aria-label="Interactive project television. Use the left and right arrow keys to change channels."
+        aria-label="Interactive project television. Use arrow keys or on-screen controls to navigate."
         onKeyDown={(event) => {
           if (event.key === "ArrowLeft") changeChannel(-1);
           if (event.key === "ArrowRight") changeChannel(1);
@@ -158,7 +209,20 @@ function Hero() {
           src="/ai-terminal-hero-v2.png"
           alt="A retro-futuristic orange AI terminal in a dark engineering studio"
         />
-        <div className={`tv-screen ${powered ? "is-on" : "is-off"}`} aria-live="polite">
+        <div
+          className={`tv-screen ${powered ? "is-on" : "is-off"}`}
+          aria-live="polite"
+          onClick={handleScreenClick}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          role="button"
+          tabIndex={0}
+          aria-label={
+            powered
+              ? "Tap screen for next frame, or swipe horizontally to change channels"
+              : "Tap screen to turn on TV"
+          }
+        >
           {powered ? (
             <>
               <img
@@ -176,7 +240,13 @@ function Hero() {
                 <span>{project.period} / PROJECT SIGNAL</span>
                 <strong>{project.title}</strong>
               </div>
-              <a href={project.repo} target="_blank" rel="noreferrer" className="tv-open-project">
+              <a
+                href={project.repo}
+                target="_blank"
+                rel="noreferrer"
+                className="tv-open-project"
+                onClick={(e) => e.stopPropagation()}
+              >
                 View source
               </a>
             </>
@@ -184,7 +254,7 @@ function Hero() {
             <div className="tv-off-screen">
               <span>STANDBY</span>
               <strong>NO SIGNAL</strong>
-              <small>PRESS POWER TO BEGIN</small>
+              <small>PRESS POWER OR TAP TO BEGIN</small>
             </div>
           )}
           <div className="tv-glass-reflection" aria-hidden="true" />
@@ -205,19 +275,16 @@ function Hero() {
         <button
           className="tv-hardware-button tv-hardware-frame"
           onClick={changeFrame}
-          disabled={!powered}
           aria-label={`Show next ${project.title} screen`}
         />
         <button
           className="tv-hardware-button tv-hardware-prev"
           onClick={() => changeChannel(-1)}
-          disabled={!powered}
           aria-label="Previous project channel"
         />
         <button
           className="tv-hardware-button tv-hardware-next"
           onClick={() => changeChannel(1)}
-          disabled={!powered}
           aria-label="Next project channel"
         />
         {showGuide && !powered && (
@@ -225,8 +292,7 @@ function Hero() {
             <span>FIRST VISIT / START HERE</span>
             <strong>Wake up the TV.</strong>
             <p>
-              Press the glowing round power button. Then use the three black buttons to browse
-              projects.
+              Tap the glowing power button or tap the screen directly to browse projects.
             </p>
             <button onClick={togglePower}>Power on TV</button>
           </div>
@@ -243,12 +309,26 @@ function Hero() {
             </span>
             <strong>{powered ? project.title : "Signal offline"}</strong>
           </div>
-          <p>{powered ? project.kicker : "Press power to tune in"}</p>
+          {powered ? (
+            <div className="tv-program-actions">
+              <a
+                href={project.repo}
+                target="_blank"
+                rel="noreferrer"
+                className="tv-open-link"
+              >
+                View Source ↗
+              </a>
+              <p>{project.kicker}</p>
+            </div>
+          ) : (
+            <p>Press power or select a channel to tune in</p>
+          )}
         </div>
         <p className="tv-program-copy">
           {powered
             ? project.body
-            : "The project channels are waiting. Start the television with the glowing button, then tune through six selected builds."}
+            : "The project channels are waiting. Start the television with the power button, tap the screen, or tune directly through six selected builds below."}
         </p>
         <ul className="tv-program-stack" aria-label={`${project.title} technologies`}>
           {(powered ? project.stack : ["Power", "Tune", "Explore"]).map((technology) => (
@@ -259,21 +339,59 @@ function Hero() {
           {EXHIBITS.map((channel, index) => (
             <button
               key={channel.id}
-              className={index === active ? "is-active" : ""}
+              className={index === active && powered ? "is-active" : ""}
               onClick={() => selectChannel(index)}
-              disabled={!powered}
               aria-label={`Tune to ${channel.title}`}
-              aria-pressed={index === active}
+              aria-pressed={index === active && powered}
             >
               <span>{String(index + 1).padStart(2, "0")}</span>
               {channel.title}
             </button>
           ))}
         </div>
-        <div className="tv-control-legend" aria-label="Television controls">
-          <span>▲ Next screen</span>
-          <span>◀ ▶ Change project</span>
-          <span>● Power</span>
+
+        <div className="tv-controls-bar" aria-label="Television remote controls">
+          <button
+            type="button"
+            className={`tv-ctrl-btn tv-ctrl-power ${powered ? "is-on" : ""}`}
+            onClick={togglePower}
+            aria-label={powered ? "Turn television off" : "Turn television on"}
+            aria-pressed={powered}
+          >
+            <span className="tv-ctrl-indicator" />
+            <span>{powered ? "POWER ON" : "POWER OFF"}</span>
+          </button>
+          <div className="tv-ctrl-nav">
+            <button
+              type="button"
+              className="tv-ctrl-btn"
+              onClick={() => changeChannel(-1)}
+              aria-label="Previous project channel"
+            >
+              ◀ CH -
+            </button>
+            <button
+              type="button"
+              className="tv-ctrl-btn tv-ctrl-frame"
+              onClick={changeFrame}
+              aria-label="Next screenshot frame"
+            >
+              ▲ FRAME {powered ? `${frame + 1}/${project.images.length}` : ""}
+            </button>
+            <button
+              type="button"
+              className="tv-ctrl-btn"
+              onClick={() => changeChannel(1)}
+              aria-label="Next project channel"
+            >
+              CH + ▶
+            </button>
+          </div>
+          <div className="tv-control-legend" aria-hidden="true">
+            <span>▲ Next screen</span>
+            <span>◀ ▶ Change project</span>
+            <span>● Power</span>
+          </div>
         </div>
       </div>
 

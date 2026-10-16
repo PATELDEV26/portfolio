@@ -73,7 +73,7 @@ export function Credentials() {
             </p>
             <a
               href={SUBJECT.resume}
-              download="Dev_Patel_Resume_AI_Engineer.pdf"
+              download="Dev_Patel_Resume_MS_Admissions_Updated.pdf"
               target="_blank"
               rel="noreferrer noopener"
               className="mt-5 inline-block border border-ink bg-ink px-5 py-3 font-mono text-[11px] uppercase tracking-[0.18em] text-paper transition-colors hover:bg-stamp"

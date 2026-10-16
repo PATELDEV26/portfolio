@@ -6,7 +6,7 @@ export const SUBJECT = {
   phone: "+91 70433 38711",
   github: "https://github.com/PATELDEV26",
   linkedin: "https://linkedin.com/in/dev-patel-66363b257",
-  resume: "/media/Dev_Patel_Resume_AI_Engineer.pdf",
+  resume: "/media/Dev_Patel_Resume_MS_Admissions_Updated.pdf",
   caseNo: "27",
 };
 

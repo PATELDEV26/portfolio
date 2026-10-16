@@ -36,7 +36,7 @@ export function FrontPage() {
               </a>
               <a
                 href={SUBJECT.resume}
-                download="Dev_Patel_Resume_AI_Engineer.pdf"
+                download="Dev_Patel_Resume_MS_Admissions_Updated.pdf"
                 target="_blank"
                 rel="noreferrer noopener"
                 className="inline-flex min-h-12 items-center justify-center border border-ink px-5 py-3 label-kicker transition-colors hover:bg-ink hover:text-paper"
